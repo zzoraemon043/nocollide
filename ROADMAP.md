@@ -1,15 +1,17 @@
 # Roadmap
 
-## v0.1 – ports and env (MVP)
+## v0.1 - ports and env (MVP)
 
-- [ ] `nocollide init`: detect common dev ports from `package.json` scripts and `.env.example`, write `nocollide.json`
-- [ ] Slot registry in `~/.nocollide/slots.json` with a file lock (safe when several agents start at once)
-- [ ] `up` / `down` / `ls` / `gc`
-- [ ] Port check: skip a port that is already listening
-- [ ] `.env` templating with slot variables
-- [ ] Works on macOS, Linux and Windows
+- [x] `nocollide init`: detect dev ports from `package.json` scripts and `.env.example`, write `nocollide.json`
+- [x] Slot registry in `~/.nocollide/slots.json` with a file lock (safe when several agents start at once)
+- [x] `up` / `down` / `ls` / `gc`
+- [x] `run` and `port` for scripts and hard-coded dev servers
+- [x] Port check: skip a slot whose port is already listening
+- [x] `.env` templating with slot variables
+- [x] CI on macOS, Linux and Windows
+- [ ] Publish to npm
 
-## v0.2 – databases and services
+## v0.2 - databases and services
 
 - [ ] Postgres: per-slot database cloned from a template database
 - [ ] SQLite: per-slot file copy
@@ -17,9 +19,9 @@
 - [ ] Redis: DB index per slot
 - [ ] Docker Compose: per-slot project name and port overrides
 
-## v0.3 – agent integrations
+## v0.3 - agent integrations
 
-- [ ] Skill / instructions file for coding agents
+- [ ] Ready-made instructions for popular coding agents
 - [ ] git `post-checkout` hook installer
 - [ ] Recipes for popular worktree managers and agent orchestrators
 

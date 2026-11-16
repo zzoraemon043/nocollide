@@ -1,8 +1,11 @@
 # nocollide
 
+[![CI](https://github.com/zzoraemon043/nocollide/actions/workflows/ci.yml/badge.svg)](https://github.com/zzoraemon043/nocollide/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **Run 5 coding agents in parallel. Zero port clashes. Zero shared databases. No containers.**
 
-> Status: early design. The CLI described below is the planned v0.1 and is not released yet. Star / watch the repo to follow along.
+> Status: v0.1 handles ports and `.env` files. Per-slot databases and Docker Compose land in v0.2. Not on npm yet, see [Try it](#try-it).
 
 ## The problem
 
@@ -10,49 +13,87 @@ Git worktrees give every agent its own copy of the **files**. They do not give i
 
 - Agent A runs `npm run dev` on port 3000. Agent B runs it too: `EADDRINUSE`.
 - Both agents run migrations against the same `app_dev` database and break each other's tests.
-- `.env` is not copied into new worktrees, so the agent starts without secrets, or with the wrong ones.
+- `.env` is not copied into new worktrees, so the agent starts without settings, or with the wrong ones.
 - Docker Compose project names collide, and one agent's `docker compose down` kills the other's services.
 
 Container-per-agent tools solve this, but they are heavy, slow to start, and replace your whole dev setup. nocollide is the thin layer in between.
 
-## How it works (planned)
+## How it works
 
 Each worktree gets a **slot number**. Everything else is derived from it.
 
 ```text
-main worktree      slot 0   web :3000   api :4000   db app_dev
-../feat-login      slot 1   web :3010   api :4010   db app_dev_s1
-../fix-cart        slot 2   web :3020   api :4020   db app_dev_s2
+main worktree      slot 0   WEB_PORT=3000   API_PORT=4000
+../feat-login      slot 1   WEB_PORT=3010   API_PORT=4010
+../fix-cart        slot 2   WEB_PORT=3020   API_PORT=4020
 ```
+
+- The main worktree always keeps slot 0, so your normal setup does not change.
+- Other worktrees get the lowest free slot. A slot is skipped when one of its ports is already in use.
+- Slots live in `~/.nocollide/slots.json` behind a lock, so ten agents running `up` at the same moment still get ten different slots.
+
+## Usage
 
 ```bash
-npx nocollide init      # once per repo: writes nocollide.json
-npx nocollide up        # in a worktree: claims a slot, writes .env.local, creates the DB
-npx nocollide ls        # who is using which ports and databases
-npx nocollide down      # frees the slot and drops the slot DB
-npx nocollide gc        # cleans slots whose worktree was deleted
+nocollide init            # once per repository: writes nocollide.json
+nocollide up              # in a worktree: claims a slot and writes .env.local
+nocollide run -- npm run dev   # runs a command with the slot variables set
+nocollide port WEB_PORT   # prints one port, handy in scripts
+nocollide ls              # every slot of this repository
+nocollide down            # releases the slot and removes .env.local
+nocollide gc              # releases slots whose worktree was deleted
 ```
 
-`nocollide.json`:
+`init` reads ports from `.env.example` (`WEB_PORT=3000`) and from `package.json` scripts (`--port 3000`, `-p 3000`, `PORT=3000`) and writes:
 
 ```json
 {
   "ports": { "WEB_PORT": 3000, "API_PORT": 4000 },
   "step": 10,
-  "env": { "from": ".env.example", "to": ".env.local" },
-  "database": { "kind": "postgres", "template": "app_dev" },
-  "compose": true
+  "env": { "from": ".env.example", "to": ".env.local" }
 }
 ```
 
-## Planned features
+Commit `nocollide.json`. Until you do, new worktrees fall back to the copy in the main worktree.
 
-- **Ports**: deterministic per-slot ports, checked against what is actually listening before they are handed out.
-- **.env**: copied from a template with slot variables filled in (`${WEB_PORT}`, `${DB_NAME}`, `${SLOT}`).
-- **Databases**: Postgres (`CREATE DATABASE ... TEMPLATE`), MySQL, SQLite (file copy), Redis (DB index per slot).
-- **Docker Compose**: unique `COMPOSE_PROJECT_NAME` per slot.
-- **Agent integrations**: a skill / instructions file for coding agents, plus a git `post-checkout` hook, so `up` runs automatically when a worktree is created.
-- **Works with any orchestrator**: it is a CLI, not a new app. Use it under your existing worktree manager or agent dashboard.
+### The env file
+
+`up` copies `env.from` to `env.to`, sets every port variable and `NOCOLLIDE_SLOT`, and fills `${...}` placeholders:
+
+```dotenv
+DATABASE_URL=postgres://localhost/app_s${NOCOLLIDE_SLOT}
+PUBLIC_URL=http://localhost:${WEB_PORT}
+```
+
+nocollide never overwrites an env file it did not write. Move your own values into the template, or pass `--force`.
+
+### Make your dev server use the port
+
+Most frameworks read `PORT` or a variable you pass in config. If a script hard-codes a port, either make it read the variable, or start it through nocollide:
+
+```bash
+nocollide run -- npm run dev
+```
+
+### Tell your agents
+
+Add one line to `AGENTS.md` or your agent's instructions file:
+
+```text
+Before starting a dev server or tests in a worktree, run `npx nocollide up` and use the ports in .env.local.
+```
+
+## Try it
+
+```bash
+git clone https://github.com/zzoraemon043/nocollide
+cd nocollide
+npm install
+npm run build
+npm link
+```
+
+Requires Node.js 22 or newer and git 2.31 or newer. Works on macOS, Linux and Windows.
 
 ## Non-goals
 
