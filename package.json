@@ -1,0 +1,41 @@
+{
+  "name": "nocollide",
+  "version": "0.1.0",
+  "description": "Run parallel coding agents without collisions: each git worktree gets its own ports, database and .env. No containers.",
+  "type": "module",
+  "bin": {
+    "nocollide": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "npm run build && node --test \"dist/test/*.test.js\"",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "git-worktree",
+    "worktree",
+    "parallel-agents",
+    "coding-agents",
+    "ports",
+    "dotenv",
+    "dev-server",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzoraemon043/nocollide.git"
+  },
+  "homepage": "https://github.com/zzoraemon043/nocollide#readme",
+  "bugs": "https://github.com/zzoraemon043/nocollide/issues",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}
