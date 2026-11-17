@@ -9,7 +9,7 @@
 - [x] Port check: skip a slot whose port is already listening
 - [x] `.env` templating with slot variables
 - [x] CI on macOS, Linux and Windows
-- [ ] Publish to npm
+- [x] Publish to npm
 
 ## v0.2 - databases and services
 

@@ -1,11 +1,20 @@
 # nocollide
 
 [![CI](https://github.com/zzoraemon043/nocollide/actions/workflows/ci.yml/badge.svg)](https://github.com/zzoraemon043/nocollide/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/nocollide.svg)](https://www.npmjs.com/package/nocollide)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Run 5 coding agents in parallel. Zero port clashes. Zero shared databases. No containers.**
 
-> Status: v0.1 handles ports and `.env` files. Per-slot databases and Docker Compose land in v0.2. Not on npm yet, see [Try it](#try-it).
+> Status: v0.1 handles ports and `.env` files. Per-slot databases and Docker Compose land in v0.2.
+
+## Install
+
+```bash
+npx nocollide init
+```
+
+Or install it once with `npm install -g nocollide`. Requires Node.js 22 or newer and git 2.31 or newer. Works on macOS, Linux and Windows.
 
 ## The problem
 
@@ -82,18 +91,6 @@ Add one line to `AGENTS.md` or your agent's instructions file:
 ```text
 Before starting a dev server or tests in a worktree, run `npx nocollide up` and use the ports in .env.local.
 ```
-
-## Try it
-
-```bash
-git clone https://github.com/zzoraemon043/nocollide
-cd nocollide
-npm install
-npm run build
-npm link
-```
-
-Requires Node.js 22 or newer and git 2.31 or newer. Works on macOS, Linux and Windows.
 
 ## Non-goals
 
