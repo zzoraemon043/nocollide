@@ -11,7 +11,7 @@ export interface Detection {
   detected: boolean;
 }
 
-const ENV_PORT = /^\s*(?:export\s+)?([A-Z_][A-Z0-9_]*PORT)\s*=\s*["']?(\d{2,5})["']?\s*$/;
+const ENV_PORT = /^\s*(?:export\s+)?((?:[A-Z_][A-Z0-9_]*)?PORT)\s*=\s*["']?(\d{2,5})["']?\s*$/;
 const SCRIPT_PORTS = [/--port[= ](\d{2,5})\b/g, /(?:^|\s)-p\s+(\d{2,5})\b/g, /\bPORT=(\d{2,5})\b/g];
 
 function validPort(value: number): boolean {

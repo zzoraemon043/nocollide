@@ -24,6 +24,14 @@ test("a single script port becomes PORT", (t) => {
   assert.deepEqual(detectPorts(box.repo).ports, { PORT: 5173 });
 });
 
+test("a plain PORT in .env.example is detected", (t) => {
+  const box = sandbox({ ".env.example": "PORT=8080\n" });
+  t.after(box.cleanup);
+  const result = detectPorts(box.repo);
+  assert.deepEqual(result.ports, { PORT: 8080 });
+  assert.equal(result.detected, true);
+});
+
 test("falls back to PORT=3000 when nothing is found", (t) => {
   const box = sandbox();
   t.after(box.cleanup);
