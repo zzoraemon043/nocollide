@@ -126,7 +126,7 @@ async function main(argv: string[]): Promise<number> {
       if (port === undefined) {
         throw new NocollideError(`Unknown port "${name}". Known: ${Object.keys(claim.ports).join(", ")}`);
       }
-      console.log(port);
+      process.stdout.write(`${port}\n`);
       return 0;
     }
     case "run": {

@@ -64,7 +64,7 @@ export function runCli(
     execFile(
       process.execPath,
       [CLI, ...args],
-      { cwd, env: { ...process.env, NOCOLLIDE_HOME: home } },
+      { cwd, env: { ...process.env, NOCOLLIDE_HOME: home, FORCE_COLOR: "1" } },
       (error, stdout, stderr) => {
         const code = error ? (typeof error.code === "number" ? error.code : 1) : 0;
         resolve({ code, stdout, stderr });
