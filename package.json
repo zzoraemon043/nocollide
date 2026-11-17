@@ -1,6 +1,6 @@
 {
   "name": "nocollide",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Run parallel coding agents without collisions: each git worktree gets its own ports, database and .env. No containers.",
   "type": "module",
   "bin": {

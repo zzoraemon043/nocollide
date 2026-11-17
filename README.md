@@ -6,6 +6,8 @@
 
 **Run 5 coding agents in parallel. Zero port clashes. Zero shared databases. No containers.**
 
+![Three agents start the same dev server. Without nocollide two of them fail with EADDRINUSE. With nocollide they run on ports 3000, 3010 and 3020.](docs/demo.gif)
+
 > Status: v0.1 handles ports and `.env` files. Per-slot databases and Docker Compose land in v0.2.
 
 ## Install
