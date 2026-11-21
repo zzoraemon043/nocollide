@@ -150,6 +150,55 @@ test("postgres: template false, --keep-data and gc", async (t) => {
   assert.equal(pg.databases.has("app_s2"), false);
 });
 
+test("database names too long for the server are refused before anything is created", async (t) => {
+  const pg = fakePostgres([]);
+  t.after(() => setPsqlRunner(undefined));
+  const mysqlCalls: string[] = [];
+  setMysqlRunner({
+    async query(_url, sql) {
+      mysqlCalls.push(sql);
+      return "";
+    },
+    async copy() {},
+  });
+  t.after(() => setMysqlRunner(undefined));
+  const longName = "a".repeat(61);
+  const box = sandbox({
+    "slotenv.json": await dbConfig({
+      databases: {
+        DATABASE_URL: { kind: "postgres", url: `postgres://localhost/${longName}`, template: false },
+        SHOP_URL: { kind: "mysql", url: `mysql://root@127.0.0.1:3306/${"b".repeat(62)}`, template: false },
+      },
+    }),
+  });
+  t.after(box.cleanup);
+  const worktree = addWorktree(box, "long");
+  await assert.rejects(up(worktree), /DATABASE_URL: database name "a{61}_s1" is 64 bytes, but Postgres allows 63/);
+  assert.deepEqual(pg.calls, []);
+  assert.deepEqual(mysqlCalls, []);
+});
+
+test("mysql database names over 64 characters are refused", async (t) => {
+  const calls: string[] = [];
+  setMysqlRunner({
+    async query(_url, sql) {
+      calls.push(sql);
+      return "";
+    },
+    async copy() {},
+  });
+  t.after(() => setMysqlRunner(undefined));
+  const box = sandbox({
+    "slotenv.json": await dbConfig({
+      databases: { SHOP_URL: { kind: "mysql", url: `mysql://root@127.0.0.1:3306/${"b".repeat(62)}`, template: false } },
+    }),
+  });
+  t.after(box.cleanup);
+  const worktree = addWorktree(box, "long");
+  await assert.rejects(up(worktree), /SHOP_URL: database name "b{62}_s1" is 65 characters, but MySQL allows 64/);
+  assert.deepEqual(calls, []);
+});
+
 test("sqlite: the main worktree file is copied into new worktrees", async (t) => {
   const box = sandbox({
     "slotenv.json": await dbConfig({ databases: { DATABASE_URL: { kind: "sqlite", path: "file:./data/dev.db" } } }),

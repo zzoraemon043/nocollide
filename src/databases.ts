@@ -75,6 +75,19 @@ async function snapshotSqlite(source: string, target: string): Promise<boolean> 
   }
 }
 
+function assertNameFits(name: string, db: DatabaseConfig, slot: number): void {
+  if (db.kind !== "postgres" && db.kind !== "mysql") return;
+  const database = databaseName(slotDatabaseValue(db, slot));
+  const size = db.kind === "postgres" ? Buffer.byteLength(database) : [...database].length;
+  const limit = db.kind === "postgres" ? 63 : 64;
+  if (size <= limit) return;
+  const unit = db.kind === "postgres" ? "bytes" : "characters";
+  const server = db.kind === "postgres" ? "Postgres" : "MySQL";
+  throw new SlotenvError(
+    `${name}: database name "${database}" is ${size} ${unit}, but ${server} allows ${limit}. Use a shorter database name in the URL.`,
+  );
+}
+
 export async function provisionDatabases(
   databases: Record<string, DatabaseConfig> | undefined,
   slot: number,
@@ -85,6 +98,7 @@ export async function provisionDatabases(
 ): Promise<Provisioned> {
   const result: Provisioned = { created: [], copied: [], warnings: [] };
   if (slot === 0 || !databases) return result;
+  for (const [name, db] of Object.entries(databases)) assertNameFits(name, db, slot);
   for (const [name, db] of Object.entries(databases)) {
     if (db.kind === "postgres" || db.kind === "mysql") {
       const url = slotDatabaseValue(db, slot);
